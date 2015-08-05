@@ -143,22 +143,39 @@ public class Creator {
 		Random rn = new Random();
 		
 		while (cells.size() > 0) {
+						
 			int cell = rn.nextInt(cells.size());
 			
 			int row = (int) Math.floor(cell/9);
-			int col = cell%9;
+			int col = cell % 9;
+			
+			//Make sure the cell you just grabbed is not already 0, continue until you find one that isn't.
+			while (board[row][col] == 0) {
+				System.out.println("Cell was already 0");
+				cell = rn.nextInt(cells.size());
+				
+				row = (int) Math.floor(cell/9);
+				col = cell % 9;
+			}
 			
 			int curValue = board[row][col];
 			board[row][col] = 0;
 			testBoard = board;
 			cells.remove(cell);
 			
-			if (Solver.validateUnique(testBoard) == 1)
+			
+			System.out.println("Removed cell " + cell);
+			if (Solver.validateUnique(testBoard) == 1) {
+				System.out.println("Puzzle is still valid.");
 				if (removeValues(board, numRemoves-1, cells))
 					return true;
+				//else
+					//numRemoves += 1;
+			}
 			
 			board[row][col] = curValue;
 			numRemoves += 1;
+			System.out.println("Puzzle no longer valid.  numRemoves set back to " + numRemoves);
 			return false;
 		}
 		
