@@ -29,4 +29,29 @@ public class Actions {
 		Message.printBoard(board);
 		
 	}
+	
+	public static void run() {
+		boolean keepRunning = true;
+		
+		while(keepRunning){
+			int choice = showMenu();
+			
+			switch (choice) {
+				case 1:	Actions.solveFile();
+						break;
+				case 2: Actions.createSudoku();
+						break;
+				case 3: keepRunning = false;
+						System.out.println("Thanks for playing!");
+						break;
+			}
+		}
+	}
+	
+	public static int showMenu() throws NumberFormatException {
+		
+	    Message.displayMenu();
+    	
+    	return Message.getChoice();	
+	}
 }

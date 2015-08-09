@@ -1,15 +1,24 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 
 public class Creator {
 
 	public static int[][] createFromScratch(int[][] board) {
-		//In order to produce a new game board, start by creating a fully filled out board, then remove values until you can't remove more.
+		/*
+		 * Simply building a unique board and then removing values from it is likely the most efficient path here.
+		 * I am leaving in a secondary commented out method that involves building in the opposite direction first, then removing values.
+		 * The reason for this is better discussed in person
+		 */
 		buildBoard(board, 0, 0);
-	
 		return removeValues(board);
+		
+		
+		//return removeValues(fillBoard(board));
+		
 	}
 	
 	public static boolean buildBoard(int[][] board) {
@@ -91,41 +100,106 @@ public class Creator {
 		}
 		return false;
 	}
+	/*
+	 * This method is not currently being used.  I am leaving it in because I am not convinced the method I've chosen to go with instead
+	 * is necessarily more effective.  Note this method would also need some cleaning.  It works, but I've left in some structure that I was 
+	 * using to debug which could be re-writing in a more elegant way. 
+	 */
+	/*
+	private static int[][] fillBoard(int[][] board) {
+		int[][] testBoard = new int[9][9];
+		int [][] puzzle = new int[9][9];
+		Random rn = new Random();
+		
+		//Create an index of cells
+		List<Integer> cells= new ArrayList<Integer>();
+				
+		for (int i = 0; i < 81; i++)
+			cells.add(i);
+			
+		int solutions = 2;
+		
+		while (solutions != 1 && cells.size() > 0) {
+			
+			solutions = Solver.validateUnique(testBoard);
+			
+			int cell = rn.nextInt(cells.size());
+			int cellValue = cells.get(cell);
+				
+			int row = (int) Math.floor(cellValue / 9);
+			int col = cellValue % 9;
+				
+			puzzle[row][col] = board[row][col];
+			puzzle[8-row][8-col] = board[8-row][8-col];
+			testBoard = puzzle;
+				
+			if (Solver.validateUnique(testBoard) == 0) {
+				//An invalid puzzle was produced, reset these values
+				puzzle[row][col] = 0;
+				puzzle[8-row][8-col] = 0;
+			}
 
+			//Either way, remove these cells from the list of possibilities
+			cells.remove(cells.indexOf(cellValue));
+			
+			//This is here so we don't try to remove the middle cell twice
+			if (cellValue != 40) 
+				cells.remove(cells.indexOf(80-cellValue));
+			
+			testBoard = puzzle;
+				
+		}
+		
+		//At this point, check to make sure the puzzle we've filled only has one valid solution, if not try again
+		testBoard = puzzle;
+		if (Solver.validateUnique(testBoard) != 1) {
+			System.out.println("Oops, we generated an invalid puzzle");
+			return fillBoard(new int[9][9]);	
+		}
+		else
+			return puzzle;
+		
+	}
+	*/
+	
 	private static int[][] removeValues(int[][] board) {
 		int[][] testBoard;
 		Random rn = new Random();
 		
 		//Create an index of cells
-		HashSet<Integer> cells= new HashSet<Integer>();
+		List<Integer> cells= new ArrayList<Integer>();
 				
 		for (int i = 0; i < 81; i++)
 			cells.add(i); 
 		
-		//Loop through the cells and randomly try removing a matching pair (or the middle cell by itself
-		//Increment by two because two cells will be removed each time
-		for (int i = 0; i < 81; i += 2) {
+		//Loop through the cells and randomly try removing a matching pair (or the middle cell by itself)
+		while (cells.size() > 0) {
 			int cell = rn.nextInt(cells.size());
+			int cellValue = cells.get(cell);
 			
-			int row = (int) Math.floor(cell/9);
-			int col = cell % 9;
-			//Store existing values in case we need to revert
-			int[] curValues = {board[row][col], board[8-row][8-col]};
+			int row = (int) Math.floor(cellValue / 9);
+			int col = cellValue % 9;
 			
-			board[row][col] = 0;
-			board[8-row][8-col] = 0;
-			testBoard = board;
+			if(board[row][col] != 0){
+				//Store existing values in case we need to revert
+				int[] curValues = {board[row][col], board[8-row][8-col]};
 			
-			if (Solver.validateUnique(testBoard) != 1) {
-				//An invalid puzzle was produced, reset these values
-				board[row][col] = curValues[0];
-				board[8-row][8-col] = curValues[1];
+				board[row][col] = 0;
+				board[8-row][8-col] = 0;
+				testBoard = board;
+			
+				if (Solver.validateUnique(testBoard) != 1) {
+					//An invalid puzzle was produced, reset these values
+					board[row][col] = curValues[0];
+					board[8-row][8-col] = curValues[1];
+				}
 			}
-
 			//Either way, remove these cells from the list of possibilities
-			cells.remove(cell);
-			cells.remove(80-cell);
+			cells.remove(cells.indexOf(cellValue));
 			
+			//This is here so we don't try to remove the middle cell twice
+			if (cellValue != 40) 
+				cells.remove(cells.indexOf(80-cellValue));
 		}
 		
 		return board;		
