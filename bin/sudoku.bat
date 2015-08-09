@@ -1,1 +1,1 @@
-java -jar ".\sudoku.jar"
+cmd /k java -jar ".\sudoku.jar"
